@@ -28,6 +28,7 @@
 #define SYNC_INTERVAL 1000 // mills between calls to sync()
 #define RESET_RTC_TIME 1
 
+#define BMP085_ENABLED 0  // If this device is not working, it stops the whole program.
 #define BMP085_I2C_ADDRESS 0x77
 // In the RTC library, the I2C address of the DS1307/DS1338 is taken to be 0x68.
 
@@ -76,7 +77,9 @@ void setup(void)
   Wire.begin();
   Serial.begin(38400);
   oneWireSensors.begin();
+#if BMP085_ENABLED
   bmp085_get_cal_data();
+#endif
 
   // initialize the SD card
   if (digitalRead(CARD_DETECT))
@@ -253,7 +256,10 @@ void loop(void)
   Serial.print('"');
 #endif
 
+#if BMP085_ENABLED
   bmp085_read_temperature_and_pressure(&raw_temperature, &raw_pressure);
+#endif
+
   temperature = (((raw_temperature - (raw_temperature % 10)) / 10) + (float)((raw_temperature % 10) / (float)10));
   pressure = (raw_pressure / (float)100);
   voltage = ((float)(analogRead(VOLTAGE_MONITOR) / (float)97) + 0.6);
